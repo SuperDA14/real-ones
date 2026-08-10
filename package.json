@@ -1,0 +1,27 @@
+{
+  "name": "vs-code",
+  "version": "1.0.0",
+  "description": "Real Ones multiplayer party game",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "multiplayer",
+    "party-game",
+    "socket-io",
+    "express"
+  ],
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": ">=18"
+  },
+  "type": "commonjs",
+  "dependencies": {
+    "express": "^5.2.1",
+    "socket.io": "^4.8.3"
+  }
+}
