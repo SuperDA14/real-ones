@@ -277,6 +277,113 @@
       background: linear-gradient(135deg, #ffffff, #b7f7ff);
     }
 
+    button.danger {
+      background: linear-gradient(135deg, #ffd7df, #ff8fab);
+    }
+
+    button.small-button {
+      width: auto;
+      min-width: 94px;
+      padding: 9px 12px;
+      border-width: 3px;
+      border-radius: 14px;
+      box-shadow: 0 5px 0 #2d2363;
+      font-size: 0.76rem;
+    }
+
+    .home-panel {
+      display: grid;
+      gap: 18px;
+    }
+
+    .split-panel {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 10px;
+      text-align: left;
+    }
+
+    .party-card {
+      background: #ffffff;
+      border: var(--soft-border);
+      border-radius: 22px;
+      box-shadow: 0 9px 0 rgba(45,35,99,0.18);
+      padding: 16px;
+    }
+
+    .party-card h3 {
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+
+    .party-card .subtitle {
+      margin: 0 0 12px;
+      font-size: 0.9rem;
+      text-align: left;
+    }
+
+    .friend-form {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .friend-list,
+    .party-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .friend-list li,
+    .party-list li,
+    .invite-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      background: #fff7d6;
+      border: 3px solid var(--ink);
+      border-radius: 16px;
+      color: var(--ink);
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .friend-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .empty-state {
+      padding: 13px;
+      background: #eaf5ff;
+      border: 3px dashed var(--ink);
+      border-radius: 16px;
+      color: var(--muted);
+      font-weight: 900;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    .party-status {
+      min-height: 22px;
+      margin-top: 12px;
+      color: #b85f00;
+      font-size: 0.88rem;
+      font-weight: 900;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
     .divider {
       display: flex;
       align-items: center;
@@ -627,6 +734,22 @@
       }
       .nav-cluster { width: 100%; }
       .nav-tab { flex: 1 1 120px; }
+      .split-panel,
+      .friend-form {
+        grid-template-columns: 1fr;
+      }
+      button.small-button {
+        width: 100%;
+      }
+      .friend-list li,
+      .party-list li,
+      .invite-box {
+        align-items: stretch;
+        flex-direction: column;
+      }
+      .friend-actions {
+        width: 100%;
+      }
       .result-item { align-items: flex-start; flex-direction: column; }
       .room-code { letter-spacing: 0.1em; }
     }
@@ -637,20 +760,49 @@
     <div class="topbar">
       <div class="mini-brand"><span class="brand-dot"></span> Real Ones</div>
       <div class="nav-cluster">
-        <button class="nav-tab active" type="button">Play</button>
-        <button class="nav-tab" type="button">Lobby</button>
+        <button id="playTab" class="nav-tab active" type="button" onclick="showHomePanel('play')">Play</button>
+        <button id="friendsTab" class="nav-tab" type="button" onclick="showHomePanel('friends')">Friends</button>
       </div>
       <div class="coin-badge">150</div>
     </div>
     <h1>How well do your friends really know you?</h1>
     <p class="subtitle">Private answers. Public guesses. Pure chaos.</p>
 
-    <div class="stack">
-      <input id="nameInput" type="text" maxlength="24" placeholder="Enter your name" />
-      <button onclick="createGame()">Create Room</button>
-      <div class="divider">Or</div>
-      <input id="roomInput" type="text" maxlength="6" placeholder="Enter room code" />
-      <button onclick="joinGame()">Join Room</button>
+    <div id="playPanel" class="home-panel">
+      <div class="stack">
+        <input id="nameInput" type="text" maxlength="24" placeholder="Enter your name" />
+        <button onclick="createGame()">Create Party Room</button>
+        <div class="divider">Or</div>
+        <input id="roomInput" type="text" maxlength="6" placeholder="Enter room code" />
+        <button onclick="joinGame()">Join Party</button>
+      </div>
+
+      <div class="party-card">
+        <h3>Your Party</h3>
+        <p class="subtitle">Add friends from your list, then share the room code when you create a lobby.</p>
+        <ul id="partyList" class="party-list"></ul>
+        <button class="secondary small-button" type="button" onclick="clearParty()" style="margin-top: 12px;">Clear Party</button>
+      </div>
+    </div>
+
+    <div id="friendsPanel" class="home-panel hidden">
+      <div class="split-panel">
+        <div class="party-card">
+          <h3>Friends</h3>
+          <div class="friend-form">
+            <input id="friendInput" type="text" maxlength="24" placeholder="Friend name" />
+            <button class="small-button" type="button" onclick="addFriend()">Add</button>
+          </div>
+          <ul id="friendsList" class="friend-list"></ul>
+        </div>
+        <div class="party-card">
+          <h3>Party Queue</h3>
+          <p class="subtitle">Pick up to 8 names for tonight's game.</p>
+          <ul id="friendsPartyList" class="party-list"></ul>
+          <button class="secondary small-button" type="button" onclick="showHomePanel('play')" style="margin-top: 12px;">Back To Play</button>
+        </div>
+      </div>
+      <div id="partyStatus" class="party-status" aria-live="polite"></div>
     </div>
 
     <div id="status" class="status" aria-live="polite"></div>
@@ -662,6 +814,13 @@
     </div>
     <h2>Room code</h2>
     <div id="roomCodeDisplay" class="room-code">------</div>
+    <div class="party-card" style="margin-bottom: 18px;">
+      <h3>Party Invite</h3>
+      <div class="invite-box">
+        <span id="inviteText">Create a room to invite friends</span>
+        <button class="small-button" type="button" onclick="copyInvite()">Copy</button>
+      </div>
+    </div>
     <h3>Players</h3>
     <ul id="playersList" class="player-list"></ul>
 
@@ -766,11 +925,224 @@
     let timerInterval = null;
     let activeTimerDeadline = 0;
     let activeTimerDuration = 60;
+    let friends = [];
+    let party = [];
+    const friendsStorageKey = 'realOnesFriends';
+    const partyStorageKey = 'realOnesParty';
 
     function setStatus(message, isError = false) {
       const status = document.getElementById('status');
       status.textContent = message;
       status.style.color = isError ? '#d7264f' : '#b85f00';
+    }
+
+    function setPartyStatus(message, isError = false) {
+      const status = document.getElementById('partyStatus');
+      status.textContent = message;
+      status.style.color = isError ? '#d7264f' : '#b85f00';
+    }
+
+    function normalizeName(name) {
+      return String(name || '').trim().replace(/\s+/g, ' ');
+    }
+
+    function loadStoredList(key) {
+      try {
+        const value = JSON.parse(localStorage.getItem(key) || '[]');
+        return Array.isArray(value) ? value.map(normalizeName).filter(Boolean) : [];
+      } catch (_error) {
+        return [];
+      }
+    }
+
+    function savePartyData() {
+      localStorage.setItem(friendsStorageKey, JSON.stringify(friends));
+      localStorage.setItem(partyStorageKey, JSON.stringify(party));
+    }
+
+    function showHomePanel(panelName) {
+      const isFriends = panelName === 'friends';
+      document.getElementById('playPanel').classList.toggle('hidden', isFriends);
+      document.getElementById('friendsPanel').classList.toggle('hidden', !isFriends);
+      document.getElementById('playTab').classList.toggle('active', !isFriends);
+      document.getElementById('friendsTab').classList.toggle('active', isFriends);
+      setStatus('');
+      renderFriends();
+      renderParty();
+    }
+
+    function createEmptyState(message) {
+      const item = document.createElement('li');
+      item.className = 'empty-state';
+      item.textContent = message;
+      return item;
+    }
+
+    function renderFriends() {
+      const list = document.getElementById('friendsList');
+      list.innerHTML = '';
+
+      if (!friends.length) {
+        list.appendChild(createEmptyState('No friends yet'));
+        return;
+      }
+
+      friends.forEach((friend) => {
+        const item = document.createElement('li');
+        const name = document.createElement('span');
+        const actions = document.createElement('div');
+        const addButton = document.createElement('button');
+        const removeButton = document.createElement('button');
+
+        name.textContent = friend;
+        actions.className = 'friend-actions';
+
+        addButton.className = 'small-button';
+        addButton.type = 'button';
+        addButton.textContent = party.includes(friend) ? 'Added' : 'Party';
+        addButton.disabled = party.includes(friend);
+        addButton.addEventListener('click', () => addFriendToParty(friend));
+
+        removeButton.className = 'small-button danger';
+        removeButton.type = 'button';
+        removeButton.textContent = 'Remove';
+        removeButton.addEventListener('click', () => removeFriend(friend));
+
+        actions.appendChild(addButton);
+        actions.appendChild(removeButton);
+        item.appendChild(name);
+        item.appendChild(actions);
+        list.appendChild(item);
+      });
+    }
+
+    function renderPartyList(targetId) {
+      const list = document.getElementById(targetId);
+      list.innerHTML = '';
+
+      if (!party.length) {
+        list.appendChild(createEmptyState('Party is empty'));
+        return;
+      }
+
+      party.forEach((member, index) => {
+        const item = document.createElement('li');
+        const name = document.createElement('span');
+        const removeButton = document.createElement('button');
+
+        name.textContent = `${index + 1}. ${member}`;
+
+        removeButton.className = 'small-button danger';
+        removeButton.type = 'button';
+        removeButton.textContent = 'Kick';
+        removeButton.addEventListener('click', () => removePartyMember(member));
+
+        item.appendChild(name);
+        item.appendChild(removeButton);
+        list.appendChild(item);
+      });
+    }
+
+    function renderParty() {
+      renderPartyList('partyList');
+      renderPartyList('friendsPartyList');
+      updateInviteText();
+    }
+
+    function addFriend() {
+      const input = document.getElementById('friendInput');
+      const friend = normalizeName(input.value);
+      const alreadySaved = friends.some((name) => name.toLowerCase() === friend.toLowerCase());
+
+      if (!friend) {
+        setPartyStatus('Type a friend name first.', true);
+        return;
+      }
+
+      if (alreadySaved) {
+        setPartyStatus('That friend is already saved.', true);
+        return;
+      }
+
+      friends.push(friend);
+      friends.sort((a, b) => a.localeCompare(b));
+      input.value = '';
+      setPartyStatus(`${friend} added to friends.`);
+      savePartyData();
+      renderFriends();
+    }
+
+    function removeFriend(friend) {
+      friends = friends.filter((name) => name !== friend);
+      party = party.filter((name) => name !== friend);
+      setPartyStatus(`${friend} removed.`);
+      savePartyData();
+      renderFriends();
+      renderParty();
+    }
+
+    function addFriendToParty(friend) {
+      if (party.includes(friend)) return;
+
+      if (party.length >= 8) {
+        setPartyStatus('Party is full. Max 8 friends.', true);
+        return;
+      }
+
+      party.push(friend);
+      setPartyStatus(`${friend} joined the party queue.`);
+      savePartyData();
+      renderFriends();
+      renderParty();
+    }
+
+    function removePartyMember(member) {
+      party = party.filter((name) => name !== member);
+      setPartyStatus(`${member} left the party queue.`);
+      savePartyData();
+      renderFriends();
+      renderParty();
+    }
+
+    function clearParty() {
+      party = [];
+      setPartyStatus('Party queue cleared.');
+      savePartyData();
+      renderFriends();
+      renderParty();
+    }
+
+    function updateInviteText() {
+      const inviteText = document.getElementById('inviteText');
+      if (!inviteText) return;
+
+      if (!currentRoom) {
+        inviteText.textContent = party.length
+          ? `${party.join(', ')} - create a room to get the code`
+          : 'Create a room to invite friends';
+        return;
+      }
+
+      const names = party.length ? ` for ${party.join(', ')}` : '';
+      inviteText.textContent = `Join my Real Ones party${names}: ${currentRoom}`;
+    }
+
+    async function copyInvite() {
+      updateInviteText();
+      const message = document.getElementById('inviteText').textContent;
+
+      try {
+        await navigator.clipboard.writeText(message);
+        setStatus('Party invite copied.');
+      } catch (_error) {
+        const textarea = document.createElement('textarea');
+        textarea.value = message;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        textarea.remove();
+        setStatus('Party invite copied.');
+      }
     }
 
     function showScreen(id) {
@@ -926,6 +1298,7 @@
       isHost = true;
       document.getElementById('roomCodeDisplay').textContent = data.roomCode;
       updatePlayers(data.players);
+      updateInviteText();
       setStatus('');
       stopTimer();
       showScreen('lobbyScreen');
@@ -936,6 +1309,7 @@
       isHost = false;
       document.getElementById('roomCodeDisplay').textContent = data.roomCode;
       updatePlayers(data.players);
+      updateInviteText();
       setStatus('');
       stopTimer();
       showScreen('lobbyScreen');
@@ -958,6 +1332,12 @@
     document.getElementById('roomInput').addEventListener('keydown', (event) => {
       if (event.key === 'Enter') {
         joinGame();
+      }
+    });
+
+    document.getElementById('friendInput').addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        addFriend();
       }
     });
 
@@ -1087,6 +1467,12 @@
       document.getElementById('winnerText').textContent = winnerName ? `${winnerName} wins the crown!` : 'Nobody scored any points this round.';
       showScreen('finalScreen');
     });
+
+    friends = loadStoredList(friendsStorageKey);
+    party = loadStoredList(partyStorageKey).filter((member) => friends.includes(member)).slice(0, 8);
+    savePartyData();
+    renderFriends();
+    renderParty();
   </script>
 </body>
 </html>
