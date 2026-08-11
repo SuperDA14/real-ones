@@ -15,6 +15,8 @@ const io = new Server(server, {
 
 const PORT = Number(process.env.PORT || 3000);
 const HOST = process.env.HOST || "0.0.0.0";
+const SEGMENT_DURATION_MS = 60 * 1000;
+const SEGMENT_DURATION_SECONDS = SEGMENT_DURATION_MS / 1000;
 
 function getLocalIps() {
   const interfaces = os.networkInterfaces();
@@ -218,6 +220,14 @@ function normalizeAnswer(value) {
   return String(value ?? "").trim().toLowerCase();
 }
 
+function getPublicPlayers(players) {
+  return players.map((player) => ({
+    id: player.id,
+    name: player.name,
+    score: player.score
+  }));
+}
+
 function createRoomState() {
   return {
     players: [],
@@ -227,13 +237,105 @@ function createRoomState() {
     selectedQuestions: [],
     currentQuestionIndex: 0,
     guesses: {},
-    currentRound: null
+    currentRound: null,
+    timer: null
   };
 }
 
 function getRoom(roomCode) {
   if (!roomCode) return null;
   return rooms[String(roomCode).toUpperCase()];
+}
+
+function getTimerPayload(deadline = Date.now() + SEGMENT_DURATION_MS) {
+  return {
+    durationSeconds: SEGMENT_DURATION_SECONDS,
+    deadline
+  };
+}
+
+function clearRoomTimer(room) {
+  if (room?.timer) {
+    clearTimeout(room.timer);
+    room.timer = null;
+  }
+}
+
+function clearPlayerTimer(player) {
+  if (player?.setupTimer) {
+    clearTimeout(player.setupTimer);
+    player.setupTimer = null;
+  }
+}
+
+function scheduleRoomTimer(roomCode, callback) {
+  const room = getRoom(roomCode);
+  if (!room) return null;
+
+  clearRoomTimer(room);
+  room.timer = setTimeout(() => {
+    room.timer = null;
+    callback();
+  }, SEGMENT_DURATION_MS);
+
+  if (typeof room.timer.unref === "function") {
+    room.timer.unref();
+  }
+
+  return room.timer;
+}
+
+function sendPersonalQuestion(roomCode, player) {
+  const question = player.personalQuestions[player.currentPersonalQuestion];
+  if (!question) return;
+
+  clearPlayerTimer(player);
+  const deadline = Date.now() + SEGMENT_DURATION_MS;
+
+  io.to(player.id).emit("yourNextQuestion", {
+    question,
+    questionNumber: player.currentPersonalQuestion + 1,
+    totalQuestions: player.personalQuestions.length,
+    ...getTimerPayload(deadline)
+  });
+
+  player.setupTimer = setTimeout(() => {
+    processPersonalAnswer(roomCode, player.id, "Skipped");
+  }, SEGMENT_DURATION_MS);
+
+  if (typeof player.setupTimer.unref === "function") {
+    player.setupTimer.unref();
+  }
+}
+
+function processPersonalAnswer(roomCode, playerId, answer) {
+  const room = getRoom(roomCode);
+  if (!room || room.status !== "setup") return;
+
+  const player = room.players.find((entry) => entry.id === playerId);
+  if (!player || player.hasAnsweredSetup) return;
+
+  const question = player.personalQuestions[player.currentPersonalQuestion];
+  if (!question) return;
+
+  const trimmed = String(answer || "").trim() || "Skipped";
+  clearPlayerTimer(player);
+
+  player.personalAnswers[question] = trimmed;
+  player.currentPersonalQuestion += 1;
+
+  if (player.currentPersonalQuestion < player.personalQuestions.length) {
+    sendPersonalQuestion(roomCode, player);
+    return;
+  }
+
+  player.hasAnsweredSetup = true;
+  io.to(player.id).emit("personalQuestionsComplete");
+
+  const everyoneDone = room.players.every((entry) => entry.hasAnsweredSetup);
+  if (everyoneDone) {
+    prepareSelectedQuestions(roomCode);
+  }
 }
 
 function assignQuestionsToPlayers(roomCode) {
@@ -249,6 +351,7 @@ function assignQuestionsToPlayers(roomCode) {
     player.currentPersonalQuestion = 0;
     player.hasAnsweredSetup = false;
     player.score = 0;
+    clearPlayerTimer(player);
 
     for (const question of shuffledBank) {
       if (!usedQuestions.has(question)) {
@@ -269,13 +372,7 @@ function assignQuestionsToPlayers(roomCode) {
     }
   });
 
-  room.players.forEach((player) => {
-    io.to(player.id).emit("yourNextQuestion", {
-      question: player.personalQuestions[0],
-      questionNumber: 1,
-      totalQuestions: player.personalQuestions.length
-    });
-  });
+  room.players.forEach((player) => sendPersonalQuestion(roomCode, player));
 }
 
 function prepareSelectedQuestions(roomCode) {
@@ -327,6 +424,7 @@ function prepareSelectedQuestions(roomCode) {
 function startRound(roomCode) {
   const room = getRoom(roomCode);
   if (!room) return;
+  clearRoomTimer(room);
 
   if (room.currentQuestionIndex >= room.selectedQuestions.length) {
     finishGame(roomCode);
@@ -337,6 +435,7 @@ function startRound(roomCode) {
   room.currentRound = current;
   room.guesses = {};
   room.status = "guessing";
+  const timerPayload = getTimerPayload();
 
   room.players.forEach((player) => {
     if (player.id === current.ownerId) {
@@ -344,22 +443,27 @@ function startRound(roomCode) {
         question: current.question,
         ownerName: current.ownerName,
         questionNumber: room.currentQuestionIndex + 1,
-        totalQuestions: room.selectedQuestions.length
+        totalQuestions: room.selectedQuestions.length,
+        ...timerPayload
       });
     } else {
       io.to(player.id).emit("guessQuestion", {
         question: current.question,
         ownerName: current.ownerName,
         questionNumber: room.currentQuestionIndex + 1,
-        totalQuestions: room.selectedQuestions.length
+        totalQuestions: room.selectedQuestions.length,
+        ...timerPayload
       });
     }
   });
+
+  scheduleRoomTimer(roomCode, () => revealQuestion(roomCode));
 }
 
 function revealQuestion(roomCode) {
   const room = getRoom(roomCode);
-  if (!room) return;
+  if (!room || room.status !== "guessing") return;
+  clearRoomTimer(room);
 
   const current = room.selectedQuestions[room.currentQuestionIndex];
   if (!current) return;
@@ -393,6 +497,7 @@ function revealQuestion(roomCode) {
   });
 
   room.status = "results";
+  const timerPayload = getTimerPayload();
 
   io.to(roomCode).emit("questionRevealed", {
     question: current.question,
@@ -401,20 +506,39 @@ function revealQuestion(roomCode) {
     questionNumber: room.currentQuestionIndex + 1,
     totalQuestions: room.selectedQuestions.length,
     results,
-    players: room.players
+    players: getPublicPlayers(room.players),
+    ...timerPayload
   });
+
+  scheduleRoomTimer(roomCode, () => advanceQuestion(roomCode));
+}
+
+function advanceQuestion(roomCode) {
+  const room = getRoom(roomCode);
+  if (!room || room.status !== "results") return;
+  clearRoomTimer(room);
+
+  room.currentQuestionIndex += 1;
+  if (room.currentQuestionIndex >= room.selectedQuestions.length) {
+    finishGame(roomCode);
+    return;
+  }
+
+  startRound(roomCode);
 }
 
 function finishGame(roomCode) {
   const room = getRoom(roomCode);
   if (!room) return;
+  clearRoomTimer(room);
+  room.players.forEach(clearPlayerTimer);
 
   room.status = "finished";
   const leaderboard = [...room.players].sort((a, b) => b.score - a.score);
   const winnerName = leaderboard[0] ? leaderboard[0].name : null;
 
   io.to(roomCode).emit("gameFinished", {
-    leaderboard,
+    leaderboard: getPublicPlayers(leaderboard),
     winnerName
   });
 }
@@ -451,11 +575,11 @@ io.on("connection", (socket) => {
 
     socket.emit("gameCreated", {
       roomCode,
-      players: room.players,
+      players: getPublicPlayers(room.players),
       isHost: true
     });
 
-    io.to(roomCode).emit("playersUpdated", { players: room.players });
+    io.to(roomCode).emit("playersUpdated", { players: getPublicPlayers(room.players) });
   });
 
   socket.on("joinGame", ({ playerName, roomCode }) => {
@@ -496,11 +620,11 @@ io.on("connection", (socket) => {
     socket.join(code);
     socket.emit("gameJoined", {
       roomCode: code,
-      players: room.players,
+      players: getPublicPlayers(room.players),
       isHost: false
     });
 
-    io.to(code).emit("playersUpdated", { players: room.players });
+    io.to(code).emit("playersUpdated", { players: getPublicPlayers(room.players) });
   });
 
   socket.on("startGame", (roomCode) => {
@@ -527,28 +651,7 @@ io.on("connection", (socket) => {
     const trimmed = String(answer || "").trim();
     if (!trimmed) return;
 
-    const question = player.personalQuestions[player.currentPersonalQuestion];
-    if (!question) return;
-
-    player.personalAnswers[question] = trimmed;
-    player.currentPersonalQuestion += 1;
-
-    if (player.currentPersonalQuestion < player.personalQuestions.length) {
-      io.to(player.id).emit("yourNextQuestion", {
-        question: player.personalQuestions[player.currentPersonalQuestion],
-        questionNumber: player.currentPersonalQuestion + 1,
-        totalQuestions: player.personalQuestions.length
-      });
-      return;
-    }
-
-    player.hasAnsweredSetup = true;
-    io.to(player.id).emit("personalQuestionsComplete");
-
-    const everyoneDone = room.players.every((entry) => entry.hasAnsweredSetup);
-    if (everyoneDone) {
-      prepareSelectedQuestions(roomCode);
-    }
+    processPersonalAnswer(roomCode, socket.id, trimmed);
   });
 
   socket.on("submitGuess", ({ roomCode, guess }) => {
@@ -578,13 +681,7 @@ io.on("connection", (socket) => {
     if (room.hostId !== socket.id) return;
     if (room.status !== "results") return;
 
-    room.currentQuestionIndex += 1;
-    if (room.currentQuestionIndex >= room.selectedQuestions.length) {
-      finishGame(roomCode);
-      return;
-    }
-
-    startRound(roomCode);
+    advanceQuestion(roomCode);
   });
 
   socket.on("disconnect", () => {
@@ -596,9 +693,11 @@ io.on("connection", (socket) => {
 
       if (playerIndex === -1) continue;
 
+      clearPlayerTimer(room.players[playerIndex]);
       room.players.splice(playerIndex, 1);
 
       if (room.players.length === 0) {
+        clearRoomTimer(room);
         delete rooms[roomCode];
         break;
       }
@@ -607,7 +706,7 @@ io.on("connection", (socket) => {
         room.hostId = room.players[0].id;
       }
 
-      io.to(roomCode).emit("playersUpdated", { players: room.players });
+      io.to(roomCode).emit("playersUpdated", { players: getPublicPlayers(room.players) });
       break;
     }
   });
