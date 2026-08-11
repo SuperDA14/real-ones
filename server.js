@@ -282,23 +282,43 @@ function prepareSelectedQuestions(roomCode) {
   const room = getRoom(roomCode);
   if (!room) return;
 
-  const poolMap = new Map();
+  const questionsByOwner = new Map();
 
   room.players.forEach((player) => {
     player.personalQuestions.forEach((question) => {
-      if (!poolMap.has(question)) {
-        poolMap.set(question, {
+      if (Object.prototype.hasOwnProperty.call(player.personalAnswers, question)) {
+        const ownerQuestions = questionsByOwner.get(player.id) || [];
+        ownerQuestions.push({
           question,
           ownerId: player.id,
           ownerName: player.name,
           answer: player.personalAnswers[question]
         });
+        questionsByOwner.set(player.id, ownerQuestions);
       }
     });
   });
 
-  const pool = [...poolMap.values()];
-  room.selectedQuestions = shuffle(pool).slice(0, Math.min(8, pool.length));
+  const guaranteedQuestions = [];
+  const remainingQuestions = [];
+
+  room.players.forEach((player) => {
+    const ownerQuestions = shuffle(questionsByOwner.get(player.id) || []);
+    const guaranteed = ownerQuestions.shift();
+
+    if (guaranteed) {
+      guaranteedQuestions.push(guaranteed);
+    }
+
+    remainingQuestions.push(...ownerQuestions);
+  });
+
+  const questionLimit = 8;
+  const openSlots = Math.max(0, questionLimit - guaranteedQuestions.length);
+  room.selectedQuestions = shuffle([
+    ...guaranteedQuestions,
+    ...shuffle(remainingQuestions).slice(0, openSlots)
+  ]);
   room.currentQuestionIndex = 0;
   room.guesses = {};
   startRound(roomCode);
