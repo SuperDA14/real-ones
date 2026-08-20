@@ -57,7 +57,7 @@ const questionBank = [
   "What is your favourite cuisine?",
   "What is your favourite chocolate?",
   "What is your favourite candy?",
-  "What food do you hate the most?",
+  "What is your most hated food?",
   "What is your go-to meal?",
   "What is your favourite movie?",
   "What is your favourite TV show?",
@@ -88,8 +88,8 @@ const questionBank = [
   "What is your favourite board game?",
   "What is your favourite card game?",
   "What sport would you most like to try?",
-  "What sport are you best at?",
-  "What sport are you worst at?",
+  "What is your best sport?",
+  "What is your worst sport?",
   "What is your favourite sport to watch?",
   "Who is your favourite athlete?",
   "What is your favourite racing circuit?",
@@ -128,18 +128,17 @@ const questionBank = [
   "What is your favourite holiday?",
   "What is your favourite emoji?",
   "What is your most-used app?",
-  "What is your favourite hobby?",
   "What is your biggest pet peeve?",
   "What annoys you the most?",
   "What makes you laugh the most?",
   "What is something you are terrible at?",
   "What is something you're surprisingly good at?",
-  "What is something you always forget?",
-  "What is something you always procrastinate?",
+  "What is your most forgotten item?",
+  "What is your biggest procrastination?",
   "What is your most embarrassing habit?",
   "What is something you could never live without?",
-  "What is the first thing you do when you wake up?",
-  "What is the last thing you do before sleeping?",
+  "What is your first move after waking up?",
+  "What is your last habit before sleeping?",
   "What is your most-used emoji?",
   "What is your weirdest habit?",
   "What is something you would never do?",
@@ -179,21 +178,22 @@ const questionBank = [
   "What was your favourite childhood TV show?",
   "What was your favourite school trip?",
   "What is your favourite childhood memory?",
-  "What is my dream job?",
-  "What is my dream car?",
-  "What is my dream holiday?",
-  "What is my biggest pet peeve?",
-  "What is my favourite food?",
-  "What is my favourite movie?",
-  "What is my favourite sport?",
-  "What is my favourite game?",
-  "What is my favourite animal?",
-  "What is my favourite colour?",
-  "What is my biggest fear?",
-  "What would I buy first if I became rich?",
-  "What country would I most want to visit?",
-  "What would I choose as my superpower?",
-  "What is one thing I couldn't live without?"
+  "What is your comfort show?",
+  "What is your karaoke song?",
+  "What is your coffee or tea order?",
+  "What is your favourite way to spend a Sunday?",
+  "What is the best gift you were ever given?",
+  "What is your favourite smell?",
+  "What is the first app you would open each morning?",
+  "What is your favourite meme?",
+  "What is your signature dance move?",
+  "What is your go-to excuse for cancelling plans?",
+  "What is the strangest thing in your bag right now?",
+  "What is your favourite thing about your best friend?",
+  "What nickname would you secretly like?",
+  "What is your favourite midnight snack?",
+  "What is the most-played song on your phone?",
+  "What is your dream pet name?"
 ];
 
 const rooms = {};
@@ -220,12 +220,53 @@ function normalizeAnswer(value) {
   return String(value ?? "").trim().toLowerCase();
 }
 
+function possessive(name) {
+  return /s$/i.test(name) ? `${name}'` : `${name}'s`;
+}
+
+const SECOND_PERSON = /\byou've\b|\byou're\b|\byou were\b|\byou are\b|\byour\b|\byou\b/gi;
+// "...if nobody could see you?" needs "them", not "they".
+const OBJECT_POSITION = /\b(see|tell|know|help|like|meet|watch|join|beat|trust|with|about|for|to|at|from)\s+$/i;
+
+// Turns a private, second-person prompt ("What is your favourite fruit?") into the
+// version the rest of the group guesses against ("What is Ana's favourite fruit?").
+// Only the first mention uses the name; later ones become pronouns so questions like
+// "What is your favourite thing about your best friend?" still read naturally.
+function personalizeQuestion(question, name) {
+  let named = false;
+
+  return String(question)
+    .replace(SECOND_PERSON, (match, offset, full) => {
+      const token = match.toLowerCase();
+      const isFirst = !named;
+      named = true;
+
+      if (token === "you've") return isFirst ? `${name} has` : "they have";
+      if (token === "you're" || token === "you are") return isFirst ? `${name} is` : "they are";
+      if (token === "you were") return isFirst ? `${name} was` : "they were";
+      if (token === "your") return isFirst ? possessive(name) : "their";
+      if (isFirst) return name;
+      return OBJECT_POSITION.test(full.slice(0, offset)) ? "them" : "they";
+    })
+    .replace(/^./, (first) => first.toUpperCase());
+}
+
 function getPublicPlayers(players) {
   return players.map((player) => ({
     id: player.id,
     name: player.name,
     score: player.score
   }));
+}
+
+function emitPlayers(roomCode) {
+  const room = getRoom(roomCode);
+  if (!room) return;
+
+  io.to(roomCode).emit("playersUpdated", {
+    players: getPublicPlayers(room.players),
+    hostId: room.hostId
+  });
 }
 
 function createRoomState() {
@@ -375,47 +416,55 @@ function assignQuestionsToPlayers(roomCode) {
   room.players.forEach((player) => sendPersonalQuestion(roomCode, player));
 }
 
+// Orders the picked questions so the same owner is never up twice in a row
+// unless there is simply nothing else left to play.
+function orderQuestionsForVariety(questions) {
+  const pool = shuffle(questions);
+  const ordered = [];
+
+  while (pool.length) {
+    const previous = ordered[ordered.length - 1];
+    const nextIndex = pool.findIndex((entry) => !previous || entry.ownerId !== previous.ownerId);
+    ordered.push(...pool.splice(nextIndex === -1 ? 0 : nextIndex, 1));
+  }
+
+  return ordered;
+}
+
 function prepareSelectedQuestions(roomCode) {
   const room = getRoom(roomCode);
   if (!room) return;
 
-  const questionsByOwner = new Map();
-
-  room.players.forEach((player) => {
-    player.personalQuestions.forEach((question) => {
-      if (Object.prototype.hasOwnProperty.call(player.personalAnswers, question)) {
-        const ownerQuestions = questionsByOwner.get(player.id) || [];
-        ownerQuestions.push({
+  const answeredByOwner = room.players.map((player) =>
+    shuffle(
+      player.personalQuestions
+        .filter((question) => Object.prototype.hasOwnProperty.call(player.personalAnswers, question))
+        .map((question) => ({
           question,
+          prompt: personalizeQuestion(question, player.name),
           ownerId: player.id,
           ownerName: player.name,
           answer: player.personalAnswers[question]
-        });
-        questionsByOwner.set(player.id, ownerQuestions);
-      }
-    });
-  });
+        }))
+    )
+  );
 
-  const guaranteedQuestions = [];
-  const remainingQuestions = [];
-
-  room.players.forEach((player) => {
-    const ownerQuestions = shuffle(questionsByOwner.get(player.id) || []);
-    const guaranteed = ownerQuestions.shift();
-
-    if (guaranteed) {
-      guaranteedQuestions.push(guaranteed);
-    }
-
-    remainingQuestions.push(...ownerQuestions);
-  });
-
+  // Take one question per player per pass, so the 8 slots are spread as evenly as
+  // the group allows before anyone contributes a second or third question.
   const questionLimit = 8;
-  const openSlots = Math.max(0, questionLimit - guaranteedQuestions.length);
-  room.selectedQuestions = shuffle([
-    ...guaranteedQuestions,
-    ...shuffle(remainingQuestions).slice(0, openSlots)
-  ]);
+  const deepestStack = Math.max(0, ...answeredByOwner.map((questions) => questions.length));
+  const selected = [];
+
+  for (let round = 0; round < deepestStack && selected.length < questionLimit; round += 1) {
+    const layer = shuffle(answeredByOwner.map((questions) => questions[round]).filter(Boolean));
+
+    for (const entry of layer) {
+      if (selected.length >= questionLimit) break;
+      selected.push(entry);
+    }
+  }
+
+  room.selectedQuestions = orderQuestionsForVariety(selected);
   room.currentQuestionIndex = 0;
   room.guesses = {};
   startRound(roomCode);
@@ -448,7 +497,7 @@ function startRound(roomCode) {
       });
     } else {
       io.to(player.id).emit("guessQuestion", {
-        question: current.question,
+        question: current.prompt,
         ownerName: current.ownerName,
         questionNumber: room.currentQuestionIndex + 1,
         totalQuestions: room.selectedQuestions.length,
@@ -500,7 +549,7 @@ function revealQuestion(roomCode) {
   const timerPayload = getTimerPayload();
 
   io.to(roomCode).emit("questionRevealed", {
-    question: current.question,
+    question: current.prompt,
     ownerName: current.ownerName,
     correctAnswer: current.answer,
     questionNumber: room.currentQuestionIndex + 1,
@@ -527,7 +576,7 @@ function advanceQuestion(roomCode) {
   startRound(roomCode);
 }
 
-function finishGame(roomCode) {
+function finishGame(roomCode, message = null) {
   const room = getRoom(roomCode);
   if (!room) return;
   clearRoomTimer(room);
@@ -539,8 +588,80 @@ function finishGame(roomCode) {
 
   io.to(roomCode).emit("gameFinished", {
     leaderboard: getPublicPlayers(leaderboard),
-    winnerName
+    winnerName,
+    message
   });
+}
+
+function returnToLobby(roomCode, message) {
+  const room = getRoom(roomCode);
+  if (!room) return;
+
+  clearRoomTimer(room);
+  room.players.forEach((player) => {
+    clearPlayerTimer(player);
+    player.score = 0;
+    player.personalQuestions = [];
+    player.personalAnswers = {};
+    player.currentPersonalQuestion = 0;
+    player.hasAnsweredSetup = false;
+  });
+
+  room.status = "lobby";
+  room.gameStarted = false;
+  room.selectedQuestions = [];
+  room.currentQuestionIndex = 0;
+  room.guesses = {};
+  room.currentRound = null;
+
+  io.to(roomCode).emit("returnedToLobby", {
+    roomCode,
+    players: getPublicPlayers(room.players),
+    hostId: room.hostId,
+    message
+  });
+}
+
+// Keeps a round moving when the player everyone was waiting on leaves.
+function resumeAfterPlayerLeft(roomCode) {
+  const room = getRoom(roomCode);
+  if (!room) return;
+
+  if (room.status === "setup") {
+    if (room.players.length < 2) {
+      returnToLobby(roomCode, "Not enough players left to keep going. Back to the lobby.");
+      return;
+    }
+
+    if (room.players.every((player) => player.hasAnsweredSetup)) {
+      prepareSelectedQuestions(roomCode);
+    }
+    return;
+  }
+
+  if (room.status === "guessing") {
+    if (room.players.length < 2) {
+      finishGame(roomCode, "Everyone else left, so we wrapped the game up early.");
+      return;
+    }
+
+    const current = room.selectedQuestions[room.currentQuestionIndex];
+    if (!current) return;
+
+    const guessers = room.players.filter((player) => player.id !== current.ownerId);
+    const allSubmitted = guessers.every((player) =>
+      Object.prototype.hasOwnProperty.call(room.guesses, player.id)
+    );
+
+    if (guessers.length === 0 || allSubmitted) {
+      revealQuestion(roomCode);
+    }
+    return;
+  }
+
+  if (room.status === "results" && room.players.length < 2) {
+    finishGame(roomCode, "Everyone else left, so we wrapped the game up early.");
+  }
 }
 
 io.on("connection", (socket) => {
@@ -576,10 +697,11 @@ io.on("connection", (socket) => {
     socket.emit("gameCreated", {
       roomCode,
       players: getPublicPlayers(room.players),
+      hostId: room.hostId,
       isHost: true
     });
 
-    io.to(roomCode).emit("playersUpdated", { players: getPublicPlayers(room.players) });
+    emitPlayers(roomCode);
   });
 
   socket.on("joinGame", ({ playerName, roomCode }) => {
@@ -621,10 +743,11 @@ io.on("connection", (socket) => {
     socket.emit("gameJoined", {
       roomCode: code,
       players: getPublicPlayers(room.players),
+      hostId: room.hostId,
       isHost: false
     });
 
-    io.to(code).emit("playersUpdated", { players: getPublicPlayers(room.players) });
+    emitPlayers(code);
   });
 
   socket.on("startGame", (roomCode) => {
@@ -693,8 +816,9 @@ io.on("connection", (socket) => {
 
       if (playerIndex === -1) continue;
 
-      clearPlayerTimer(room.players[playerIndex]);
-      room.players.splice(playerIndex, 1);
+      const [departed] = room.players.splice(playerIndex, 1);
+      clearPlayerTimer(departed);
+      delete room.guesses[socket.id];
 
       if (room.players.length === 0) {
         clearRoomTimer(room);
@@ -706,7 +830,9 @@ io.on("connection", (socket) => {
         room.hostId = room.players[0].id;
       }
 
-      io.to(roomCode).emit("playersUpdated", { players: getPublicPlayers(room.players) });
+      emitPlayers(roomCode);
+      io.to(roomCode).emit("playerLeft", { name: departed.name, hostId: room.hostId });
+      resumeAfterPlayerLeft(roomCode);
       break;
     }
   });

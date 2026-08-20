@@ -3,29 +3,34 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1a0b33" />
   <title>Real Ones</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap');
-
     :root {
-      --bg-1: #7bdff2;
-      --bg-2: #f7d84a;
-      --bg-3: #ff8fab;
-      --ink: #2d2363;
-      --panel: rgba(255, 255, 255, 0.92);
-      --card: #fff7d6;
-      --primary: #ffffff;
-      --primary-dark: #eaf5ff;
-      --secondary: #fff3a6;
-      --accent: #16b8f3;
-      --green: #31d88b;
-      --pink: #ff5fa2;
-      --red: #ff5d66;
-      --gold: #ffd43b;
-      --text: #2d2363;
-      --muted: #66589a;
-      --shadow: 0 22px 0 #2d2363, 0 30px 60px rgba(45, 35, 99, 0.24);
-      --soft-border: 4px solid var(--ink);
+      --violet: #8b5cf6;
+      --pink: #ec4899;
+      --blue: #3b82f6;
+      --cyan: #22d3ee;
+      --green: #34d399;
+      --gold: #fbbf24;
+      --red: #fb7185;
+
+      --ink: #f5f1ff;
+      --muted: #b0a4d6;
+      --faint: #8479ab;
+
+      --panel: rgba(24, 13, 48, 0.62);
+      --panel-solid: rgba(30, 17, 58, 0.82);
+      --card: rgba(255, 255, 255, 0.06);
+      --line: rgba(255, 255, 255, 0.13);
+      --line-strong: rgba(255, 255, 255, 0.22);
+
+      --accent: linear-gradient(135deg, #a855f7 0%, #ec4899 55%, #f472b6 100%);
+      --glass-shadow: 0 30px 70px rgba(8, 3, 24, 0.55);
+      --radius: 26px;
     }
 
     * { box-sizing: border-box; }
@@ -33,13 +38,6 @@
     html, body {
       margin: 0;
       min-height: 100%;
-      font-family: "Nunito", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background:
-        linear-gradient(135deg, rgba(255,255,255,0.38) 25%, transparent 25%) 0 0 / 72px 72px,
-        linear-gradient(135deg, transparent 75%, rgba(255,255,255,0.28) 75%) 0 0 / 72px 72px,
-        linear-gradient(145deg, var(--bg-3) 0%, var(--bg-2) 48%, var(--bg-1) 100%);
-      color: var(--text);
-      letter-spacing: 0;
     }
 
     body {
@@ -47,48 +45,86 @@
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      padding: 22px;
+      min-height: 100dvh;
+      padding: 24px 18px 40px;
       position: relative;
       overflow-x: hidden;
+      font-family: "Outfit", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: #150826;
+      background-image:
+        radial-gradient(120% 90% at 12% 8%, rgba(139, 92, 246, 0.55) 0%, transparent 60%),
+        radial-gradient(110% 90% at 88% 12%, rgba(236, 72, 153, 0.45) 0%, transparent 58%),
+        radial-gradient(120% 100% at 50% 100%, rgba(59, 130, 246, 0.5) 0%, transparent 62%),
+        linear-gradient(160deg, #2a0f4f 0%, #190a33 45%, #10061f 100%);
+      background-attachment: fixed;
     }
 
-    body::before {
-      content: "";
+    /* Slow drifting colour blobs behind the glass panels. */
+    .aurora {
       position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(45deg, transparent 46%, rgba(255,255,255,0.65) 47%, rgba(255,255,255,0.65) 53%, transparent 54%),
-        linear-gradient(-45deg, transparent 46%, rgba(49,216,139,0.52) 47%, rgba(49,216,139,0.52) 53%, transparent 54%),
-        radial-gradient(circle, rgba(45,35,99,0.24) 2px, transparent 3px);
-      background-size: 90px 90px, 110px 110px, 34px 34px;
-      background-position: 8px 12px, 44px 28px, 0 0;
-      opacity: 0.7;
+      inset: -20vmax;
+      z-index: 0;
       pointer-events: none;
+      filter: blur(70px);
+      opacity: 0.55;
     }
+
+    .aurora span {
+      position: absolute;
+      display: block;
+      border-radius: 50%;
+      mix-blend-mode: screen;
+      animation: drift 22s ease-in-out infinite alternate;
+    }
+
+    .aurora span:nth-child(1) {
+      width: 46vmax; height: 46vmax;
+      top: 6%; left: 4%;
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.9), transparent 68%);
+    }
+
+    .aurora span:nth-child(2) {
+      width: 40vmax; height: 40vmax;
+      top: 42%; right: 2%;
+      background: radial-gradient(circle, rgba(236, 72, 153, 0.85), transparent 68%);
+      animation-duration: 27s;
+      animation-delay: -6s;
+    }
+
+    .aurora span:nth-child(3) {
+      width: 44vmax; height: 44vmax;
+      bottom: 0%; left: 28%;
+      background: radial-gradient(circle, rgba(56, 130, 246, 0.9), transparent 68%);
+      animation-duration: 31s;
+      animation-delay: -12s;
+    }
+
+    @keyframes drift {
+      from { transform: translate3d(0, 0, 0) scale(1); }
+      to   { transform: translate3d(6vmax, -5vmax, 0) scale(1.18); }
+    }
+
+    /* ---------- Layout shell ---------- */
 
     .screen {
-      width: min(100%, 860px);
-      background: var(--panel);
-      border: var(--soft-border);
-      border-radius: 28px;
-      box-shadow: var(--shadow);
-      padding: 34px;
       position: relative;
       z-index: 1;
-      overflow: hidden;
+      width: min(100%, 880px);
+      padding: 30px 30px 34px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(26px) saturate(150%);
+      -webkit-backdrop-filter: blur(26px) saturate(150%);
       text-align: center;
+      animation: riseIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
     }
 
-    .screen::before {
-      content: "";
-      position: absolute;
-      top: 16px;
-      right: 18px;
-      width: 74px;
-      height: 22px;
-      border-block: 5px solid rgba(255,95,162,0.85);
-      transform: rotate(12deg);
-      pointer-events: none;
+    @keyframes riseIn {
+      from { opacity: 0; transform: translateY(18px) scale(0.985); }
+      to   { opacity: 1; transform: none; }
     }
 
     .hidden { display: none !important; }
@@ -97,229 +133,254 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 18px;
-      padding: 10px;
-      background: #ffffff;
-      border: var(--soft-border);
-      border-radius: 22px;
-      box-shadow: 0 8px 0 rgba(45,35,99,0.18);
+      gap: 14px;
+      margin-bottom: 22px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--line);
     }
 
     .mini-brand {
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      font-size: 0.8rem;
-      font-weight: 900;
-      color: var(--text);
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
+      color: var(--ink);
       white-space: nowrap;
     }
 
     .brand-dot {
-      width: 14px;
-      height: 14px;
-      border-radius: 999px;
-      background: linear-gradient(135deg, var(--green), #7ad6ff);
-      border: 3px solid var(--ink);
-      box-shadow: 3px 3px 0 var(--gold);
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 16px rgba(236, 72, 153, 0.85);
     }
 
     .nav-cluster {
       display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-      flex: 1;
+      gap: 8px;
+      padding: 4px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--line);
+      border-radius: 999px;
     }
 
     .nav-tab {
-      background: #b7f7ff;
-      color: #38256b;
-      border: 3px solid var(--ink);
-      box-shadow: 0 5px 0 rgba(45,35,99,0.28);
-      border-radius: 16px;
-      padding: 11px 16px;
-      min-width: 110px;
-      font-size: 0.8rem;
-      font-weight: 900;
+      width: auto;
+      min-width: 92px;
+      padding: 9px 18px;
+      background: transparent;
+      border: 0;
+      border-radius: 999px;
+      box-shadow: none;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
       cursor: pointer;
-      transition: transform 0.08s ease;
+      transition: color 0.18s ease, background 0.18s ease;
     }
+
+    .nav-tab:hover { color: var(--ink); transform: none; box-shadow: none; }
 
     .nav-tab.active {
-      background: var(--gold);
-      transform: translateY(-1px);
-      box-shadow: 0 7px 0 rgba(45,35,99,0.32);
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 6px 18px rgba(236, 72, 153, 0.35);
     }
 
-    .coin-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      background: #ffe56b;
-      color: #38256b;
-      border: 3px solid var(--ink);
+    .round-chip {
+      padding: 8px 14px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid var(--line);
       border-radius: 999px;
-      font-size: 0.9rem;
-      font-weight: 900;
-      min-width: 96px;
-      justify-content: center;
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
     }
 
     h1, h2, h3, p { margin: 0; }
 
     h1 {
-      font-size: clamp(1.5rem, 2.8vw, 3rem);
-      line-height: 1.05;
-      text-transform: uppercase;
-      margin-bottom: 14px;
-      text-shadow: 0 18px 44px rgba(18, 10, 42, 0.28);
+      max-width: 720px;
+      margin: 0 auto 12px;
+      font-size: clamp(1.7rem, 4vw, 2.9rem);
       font-weight: 900;
-      max-width: 780px;
-      margin-inline: auto;
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      background: linear-gradient(120deg, #ffffff 10%, #f0abfc 50%, #93c5fd 90%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
     }
 
     h2 {
-      font-size: clamp(1.2rem, 2.2vw, 2rem);
-      line-height: 1.1;
-      text-transform: uppercase;
-      margin-bottom: 12px;
-      font-weight: 900;
-      max-width: 760px;
-      margin-inline: auto;
+      max-width: 720px;
+      margin: 0 auto 10px;
+      font-size: clamp(1.25rem, 2.6vw, 1.9rem);
+      font-weight: 800;
+      line-height: 1.18;
+      letter-spacing: -0.01em;
     }
 
     h3 {
-      font-size: 1rem;
-      line-height: 1.2;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
-      font-weight: 900;
       color: var(--muted);
     }
 
     .subtitle {
+      max-width: 560px;
+      margin: 0 auto 22px;
       color: var(--muted);
-      line-height: 1.5;
-      margin-bottom: 20px;
       font-size: 1rem;
-      font-weight: 700;
-      max-width: 620px;
-      margin-inline: auto;
-      margin-bottom: 20px;
+      font-weight: 500;
+      line-height: 1.55;
     }
 
     .stack {
       display: grid;
       gap: 12px;
-      width: min(100%, 520px);
+      width: min(100%, 460px);
       margin-inline: auto;
     }
 
+    /* ---------- Controls ---------- */
+
     input, button {
       width: 100%;
-      font: inherit;
-      letter-spacing: 0;
+      font-family: inherit;
     }
 
     input {
-      background: rgba(255,255,255,0.92);
-      color: #2d1e54;
-      padding: 17px 18px;
-      border: 4px solid var(--ink);
-      border-radius: 18px;
-      box-shadow: 0 8px 0 rgba(45,35,99,0.16);
-      outline: none;
-      text-transform: uppercase;
+      padding: 17px 20px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid var(--line-strong);
+      border-radius: 16px;
+      color: var(--ink);
       font-size: 1rem;
-      font-weight: 800;
+      font-weight: 600;
+      outline: none;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
     }
 
-    input::placeholder {
-      color: rgba(46,34,74,0.7);
-      text-transform: uppercase;
-    }
+    input::placeholder { color: var(--faint); font-weight: 500; }
 
     input:focus {
-      background: #fff;
-      box-shadow: 0 0 0 5px rgba(22,184,243,0.28), 0 8px 0 rgba(45,35,99,0.16);
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(236, 72, 153, 0.7);
+      box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.18);
     }
 
     button {
-      background: linear-gradient(135deg, #fff176, #ff9f1c);
-      color: #2c1753;
-      border: 4px solid var(--ink);
-      border-radius: 18px;
-      box-shadow: 0 9px 0 #2d2363;
-      padding: 16px 18px;
+      padding: 17px 22px;
+      background: var(--accent);
+      border: 0;
+      border-radius: 16px;
+      box-shadow: 0 12px 28px rgba(168, 85, 247, 0.32);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
       cursor: pointer;
-      text-transform: uppercase;
-      font-size: 0.95rem;
-      font-weight: 900;
-      transition: transform 0.16s ease, filter 0.12s ease, box-shadow 0.16s ease;
+      transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease, opacity 0.16s ease;
     }
 
-    button:hover {
+    button:hover:not(:disabled) {
       transform: translateY(-2px);
-      filter: brightness(1.02);
-      box-shadow: 0 11px 0 #2d2363;
+      box-shadow: 0 18px 34px rgba(168, 85, 247, 0.42);
+      filter: brightness(1.05);
     }
 
-    button:active {
-      transform: translateY(1px);
-      box-shadow: 0 4px 0 #2d2363;
+    button:active:not(:disabled) { transform: translateY(0); }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      box-shadow: none;
     }
 
     button.secondary {
-      background: linear-gradient(135deg, #ffffff, #b7f7ff);
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--line-strong);
+      box-shadow: none;
+      color: var(--ink);
+    }
+
+    button.secondary:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.14);
+      box-shadow: none;
     }
 
     button.danger {
-      background: linear-gradient(135deg, #ffd7df, #ff8fab);
+      background: rgba(251, 113, 133, 0.16);
+      border: 1px solid rgba(251, 113, 133, 0.4);
+      box-shadow: none;
+      color: #ffd7de;
     }
 
     button.small-button {
       width: auto;
-      min-width: 94px;
-      padding: 9px 12px;
-      border-width: 3px;
-      border-radius: 14px;
-      box-shadow: 0 5px 0 #2d2363;
-      font-size: 0.76rem;
+      min-width: 84px;
+      padding: 9px 14px;
+      border-radius: 12px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      box-shadow: none;
     }
 
-    .home-panel {
-      display: grid;
-      gap: 18px;
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin: 4px 0;
+      color: var(--faint);
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
     }
+
+    .divider::before, .divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--line);
+    }
+
+    /* ---------- Home extras ---------- */
+
+    .home-panel { display: grid; gap: 20px; }
 
     .split-panel {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 16px;
-      margin-top: 10px;
       text-align: left;
     }
 
     .party-card {
-      background: #ffffff;
-      border: var(--soft-border);
-      border-radius: 22px;
-      box-shadow: 0 9px 0 rgba(45,35,99,0.18);
-      padding: 16px;
+      padding: 18px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      text-align: left;
     }
 
-    .party-card h3 {
-      color: var(--ink);
-      margin-bottom: 8px;
-    }
+    .party-card h3 { margin-bottom: 10px; }
 
     .party-card .subtitle {
-      margin: 0 0 12px;
-      font-size: 0.9rem;
+      margin: 0 0 14px;
+      font-size: 0.88rem;
       text-align: left;
     }
 
@@ -327,275 +388,341 @@
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
       gap: 10px;
-      align-items: center;
       margin-bottom: 14px;
     }
 
-    .friend-list,
-    .party-list {
+    .friend-list, .party-list {
       display: grid;
-      gap: 10px;
+      gap: 8px;
       margin: 0;
       padding: 0;
       list-style: none;
     }
 
-    .friend-list li,
-    .party-list li,
-    .invite-box {
+    .friend-list li, .party-list li, .invite-box {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      padding: 10px 12px;
-      background: #fff7d6;
-      border: 3px solid var(--ink);
-      border-radius: 16px;
-      color: var(--ink);
-      font-weight: 900;
-      text-transform: uppercase;
+      padding: 11px 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      font-size: 0.9rem;
+      font-weight: 600;
     }
 
-    .friend-actions {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-      gap: 8px;
-    }
+    .invite-box { font-size: 0.85rem; color: var(--muted); text-align: left; }
+
+    .friend-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
 
     .empty-state {
-      padding: 13px;
-      background: #eaf5ff;
-      border: 3px dashed var(--ink);
-      border-radius: 16px;
-      color: var(--muted);
-      font-weight: 900;
+      padding: 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px dashed var(--line-strong);
+      border-radius: 14px;
+      color: var(--faint);
+      font-size: 0.84rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
       text-align: center;
+      justify-content: center;
     }
 
     .party-status {
-      min-height: 22px;
+      min-height: 20px;
       margin-top: 12px;
-      color: #b85f00;
-      font-size: 0.88rem;
-      font-weight: 900;
-      text-align: center;
-      text-transform: uppercase;
-    }
-
-    .divider {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      text-transform: uppercase;
-      color: var(--muted);
+      color: var(--gold);
       font-size: 0.85rem;
-      font-weight: 800;
-      margin: 8px 0 4px;
+      font-weight: 600;
+      text-align: center;
     }
 
-    .divider::before, .divider::after {
-      content: "";
-      display: block;
-      height: 2px;
-      flex: 1;
-      background: rgba(45,35,99,0.22);
+    .hint {
+      min-height: 20px;
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 0.88rem;
+      font-weight: 600;
     }
 
-    .status {
-      min-height: 22px;
-      margin-top: 12px;
-      color: #b85f00;
-      font-size: 0.9rem;
-      font-weight: 800;
-      line-height: 1.6;
+    .hint.error { color: var(--red); }
+
+    /* ---------- Toast ---------- */
+
+    #toastHost {
+      position: fixed;
+      top: 18px;
+      left: 50%;
+      z-index: 50;
+      display: grid;
+      gap: 10px;
+      width: min(92vw, 420px);
+      transform: translateX(-50%);
+      pointer-events: none;
     }
+
+    .toast {
+      padding: 14px 18px;
+      background: rgba(38, 20, 68, 0.92);
+      border: 1px solid var(--line-strong);
+      border-left: 3px solid var(--cyan);
+      border-radius: 14px;
+      box-shadow: 0 18px 40px rgba(8, 3, 24, 0.55);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      color: var(--ink);
+      font-size: 0.92rem;
+      font-weight: 600;
+      text-align: left;
+      animation: toastIn 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .toast.error { border-left-color: var(--red); }
+    .toast.leaving { animation: toastOut 0.25s ease forwards; }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(-14px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    @keyframes toastOut {
+      to { opacity: 0; transform: translateY(-12px); }
+    }
+
+    /* ---------- Timer ---------- */
 
     .segment-timer {
-      width: min(100%, 360px);
-      margin: 0 auto 18px;
-      padding: 10px;
-      background: #ffffff;
-      border: var(--soft-border);
-      border-radius: 999px;
-      box-shadow: 0 8px 0 rgba(45,35,99,0.18);
+      width: min(100%, 340px);
+      margin: 0 auto 20px;
     }
 
     .timer-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 7px;
-      padding-inline: 4px;
-      color: var(--ink);
-      font-size: 0.82rem;
-      font-weight: 900;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
     }
 
     .timer-seconds {
-      min-width: 54px;
-      padding: 4px 9px;
-      background: var(--gold);
-      border: 3px solid var(--ink);
+      padding: 3px 12px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--line);
       border-radius: 999px;
-      line-height: 1;
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
     }
 
     .timer-track {
-      height: 15px;
+      height: 8px;
       overflow: hidden;
-      background: #eaf5ff;
-      border: 3px solid var(--ink);
+      background: rgba(255, 255, 255, 0.08);
       border-radius: 999px;
     }
 
     .timer-fill {
       width: 100%;
       height: 100%;
-      background: linear-gradient(90deg, var(--green), var(--accent), var(--gold));
+      background: linear-gradient(90deg, var(--cyan), var(--violet), var(--pink));
       border-radius: inherit;
-      transition: width 0.24s linear, background 0.18s ease;
+      transition: width 0.25s linear;
     }
 
     .segment-timer.urgent .timer-seconds {
-      background: var(--red);
-      color: #ffffff;
+      background: rgba(251, 113, 133, 0.2);
+      border-color: rgba(251, 113, 133, 0.5);
+      color: #ffd7de;
     }
 
     .segment-timer.urgent .timer-fill {
-      background: linear-gradient(90deg, var(--red), var(--pink));
+      background: linear-gradient(90deg, #fb7185, #f43f5e);
     }
 
+    /* ---------- Lobby ---------- */
+
     .room-code {
-      display: inline-block;
-      margin: 8px 0 18px;
-      padding: 14px 18px;
-      background: rgba(255,255,255,0.9);
-      color: #2a1d4d;
-      border: 4px solid var(--ink);
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      margin: 6px 0 20px;
+      padding: 16px 26px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--line-strong);
       border-radius: 20px;
-      box-shadow: 0 8px 0 rgba(45,35,99,0.2);
-      letter-spacing: 0.2em;
-      font-size: clamp(1.2rem, 3vw, 2rem);
-      text-transform: uppercase;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      font-size: clamp(1.7rem, 5vw, 2.6rem);
+      font-weight: 900;
+      letter-spacing: 0.28em;
+      text-indent: 0.28em;
+      color: #fff;
+      text-shadow: 0 0 24px rgba(236, 72, 153, 0.45);
     }
 
     .player-list {
-      list-style: none;
-      padding: 0;
       display: grid;
-      gap: 12px;
-      margin: 18px 0 20px;
+      gap: 10px;
+      margin: 16px auto 22px;
+      padding: 0;
+      max-width: 560px;
+      list-style: none;
       text-align: left;
     }
 
     .player-list li {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      background: #ffffff;
-      border: var(--soft-border);
-      border-radius: 18px;
+      gap: 14px;
       padding: 13px 16px;
-      font-size: 0.92rem;
-      font-weight: 900;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      animation: riseIn 0.3s ease both;
+    }
+
+    .avatar {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 800;
+      flex: none;
+    }
+
+    .player-name { flex: 1; }
+
+    .badge {
+      padding: 4px 11px;
+      background: rgba(251, 191, 36, 0.16);
+      border: 1px solid rgba(251, 191, 36, 0.4);
+      border-radius: 999px;
+      color: var(--gold);
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
     }
 
-    .player-list .badge {
-      color: #d67000;
-      font-size: 0.78rem;
+    .badge.you {
+      background: rgba(34, 211, 238, 0.14);
+      border-color: rgba(34, 211, 238, 0.4);
+      color: var(--cyan);
     }
 
+    /* ---------- Game cards ---------- */
+
     .card {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 26px;
       background: var(--card);
-      border: var(--soft-border);
-      border-radius: 24px;
-      box-shadow: 0 10px 0 rgba(45,35,99,0.18);
-      padding: 22px;
-      margin-top: 18px;
-      max-width: 720px;
-      margin-inline: auto;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
 
     .question-counter {
       display: inline-block;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
+      padding: 6px 14px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid var(--line);
+      border-radius: 999px;
       color: var(--muted);
-      font-size: 0.82rem;
-      font-weight: 900;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
     }
 
     .question-text {
-      font-size: clamp(0.9rem, 2vw, 1.6rem);
-      line-height: 1.35;
-      text-transform: uppercase;
-      margin-bottom: 16px;
-      color: var(--text);
-      font-weight: 900;
+      margin-bottom: 22px;
+      font-size: clamp(1.25rem, 3vw, 1.85rem);
+      font-weight: 800;
+      line-height: 1.25;
+      letter-spacing: -0.01em;
     }
 
-    .answer-input {
-      margin-top: 8px;
+    .revealed-question {
+      margin-bottom: 18px;
+      color: var(--muted);
+      font-size: 1rem;
+      font-weight: 600;
+      line-height: 1.4;
     }
 
     .guess-label {
-      display: inline-block;
-      margin-bottom: 10px;
-      color: var(--muted);
-      font-size: 0.82rem;
-      font-weight: 900;
+      display: block;
+      margin-bottom: 6px;
+      color: var(--faint);
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.16em;
       text-transform: uppercase;
     }
 
-    .waiting-box {
-      text-align: center;
-      padding: 34px 18px;
+    .private-note {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 18px;
+      color: var(--faint);
+      font-size: 0.82rem;
+      font-weight: 600;
     }
 
+    /* ---------- Waiting ---------- */
+
+    .waiting-box { padding: 28px 10px 18px; }
+
     .loading-orbit {
-      width: 86px;
-      height: 86px;
+      position: relative;
       display: grid;
       place-items: center;
-      margin: 0 auto 22px;
+      width: 92px;
+      height: 92px;
+      margin: 0 auto 26px;
       border-radius: 50%;
-      background: rgba(255,255,255,0.1);
-      border: 4px solid var(--ink);
-      box-shadow: inset 0 0 28px rgba(119,221,255,0.3), 0 8px 0 rgba(45,35,99,0.2);
-      position: relative;
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.22), transparent 68%);
     }
 
     .loading-orbit::before {
       content: "";
-      width: 58px;
-      height: 58px;
+      width: 92px;
+      height: 92px;
       border-radius: 50%;
-      border: 6px solid rgba(45,35,99,0.14);
-      border-top-color: var(--accent);
-      border-right-color: var(--green);
-      animation: spin 0.9s linear infinite;
+      border: 3px solid rgba(255, 255, 255, 0.08);
+      border-top-color: var(--pink);
+      border-right-color: var(--violet);
+      animation: spin 1.1s linear infinite;
     }
 
     .loading-orbit::after {
       content: "";
-      width: 16px;
-      height: 16px;
       position: absolute;
+      width: 14px;
+      height: 14px;
       border-radius: 50%;
-      background: var(--gold);
-      box-shadow: 0 0 24px rgba(255,221,102,0.8);
+      background: var(--cyan);
+      box-shadow: 0 0 22px rgba(34, 211, 238, 0.9);
+      animation: pulseDot 1.6s ease-in-out infinite;
     }
 
     .loading-dots {
       display: inline-flex;
-      gap: 8px;
-      justify-content: center;
-      margin-top: 4px;
+      gap: 9px;
+      margin-top: 20px;
     }
 
     .loading-dots span {
@@ -603,159 +730,225 @@
       height: 9px;
       border-radius: 50%;
       background: var(--pink);
-      border: 2px solid var(--ink);
-      animation: pulse 1.1s ease-in-out infinite;
+      animation: bounce 1.2s ease-in-out infinite;
     }
 
-    .loading-dots span:nth-child(2) { animation-delay: 0.15s; }
-    .loading-dots span:nth-child(3) { animation-delay: 0.3s; }
+    .loading-dots span:nth-child(2) { background: var(--violet); animation-delay: 0.16s; }
+    .loading-dots span:nth-child(3) { background: var(--cyan); animation-delay: 0.32s; }
 
-    .segment-timer.urgent {
-      animation: wobble 0.42s ease-in-out infinite alternate;
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @keyframes pulseDot {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(0.6); opacity: 0.55; }
     }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); opacity: 0.4; }
+      50% { transform: translateY(-9px); opacity: 1; }
     }
 
-    @keyframes pulse {
-      0%, 100% { transform: translateY(0); opacity: 0.35; }
-      50% { transform: translateY(-5px); opacity: 1; }
+    /* ---------- Results ---------- */
+
+    .answer-reveal {
+      margin-bottom: 22px;
+      padding: 22px;
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.18), rgba(236, 72, 153, 0.14));
+      border: 1px solid rgba(236, 72, 153, 0.32);
+      border-radius: 20px;
+      animation: riseIn 0.4s ease both;
     }
 
-    @keyframes wobble {
-      from { transform: rotate(-1deg) scale(1); }
-      to { transform: rotate(1deg) scale(1.02); }
+    #correctAnswer {
+      font-size: clamp(1.5rem, 4vw, 2.3rem);
+      font-weight: 900;
+      word-break: break-word;
     }
 
     .results-list {
       display: grid;
       gap: 10px;
-      margin: 18px 0;
+      margin: 20px 0 24px;
       text-align: left;
     }
 
     .result-item {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      gap: 12px;
-      background: #ffffff;
-      border: var(--soft-border);
-      border-radius: 18px;
-      padding: 12px 14px;
-      font-size: 0.88rem;
-      font-weight: 800;
-      text-transform: uppercase;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 13px 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      animation: riseIn 0.35s ease both;
     }
 
     .result-item.matched {
-      border-color: rgba(106,240,168,0.8);
-      background: #d9ffeb;
+      background: rgba(52, 211, 153, 0.12);
+      border-color: rgba(52, 211, 153, 0.4);
     }
 
-    .result-meta {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
+    .result-item.owner-row {
+      background: rgba(251, 191, 36, 0.1);
+      border-color: rgba(251, 191, 36, 0.32);
     }
 
-    .result-name { font-weight: 800; }
-    .result-answer { color: var(--muted); word-break: break-word; }
+    .result-meta { display: grid; gap: 3px; min-width: 0; }
+    .result-name { font-size: 0.82rem; font-weight: 700; color: var(--muted); }
+    .result-answer { font-size: 1rem; font-weight: 700; word-break: break-word; }
+
     .result-tag {
-      color: var(--green);
+      flex: none;
+      padding: 5px 12px;
+      background: rgba(255, 255, 255, 0.07);
+      border-radius: 999px;
+      color: var(--faint);
+      font-size: 0.76rem;
       font-weight: 800;
       white-space: nowrap;
     }
 
+    .result-item.matched .result-tag {
+      background: rgba(52, 211, 153, 0.2);
+      color: var(--green);
+    }
+
+    .result-item.owner-row .result-tag {
+      background: rgba(251, 191, 36, 0.18);
+      color: var(--gold);
+    }
+
+    /* ---------- Final ---------- */
+
     .winner-banner {
       display: inline-block;
-      padding: 8px 12px;
-      background: rgba(255,221,102,0.2);
-      border: 4px solid var(--ink);
-      border-radius: 999px;
-      color: var(--ink);
-      font-size: 0.82rem;
-      font-weight: 900;
-      text-transform: uppercase;
       margin-bottom: 14px;
+      padding: 7px 18px;
+      background: rgba(251, 191, 36, 0.14);
+      border: 1px solid rgba(251, 191, 36, 0.4);
+      border-radius: 999px;
+      color: var(--gold);
+      font-size: 0.74rem;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .trophy {
+      font-size: 3.4rem;
+      line-height: 1;
+      animation: bobble 2.4s ease-in-out infinite;
+    }
+
+    @keyframes bobble {
+      0%, 100% { transform: translateY(0) rotate(-4deg); }
+      50% { transform: translateY(-10px) rotate(4deg); }
     }
 
     .leaderboard {
       display: grid;
-      gap: 12px;
-      margin: 18px 0 20px;
+      gap: 10px;
+      max-width: 560px;
+      margin: 22px auto 26px;
       text-align: left;
     }
 
     .leaderboard-item {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      gap: 10px;
-      background: #ffffff;
-      border: var(--soft-border);
-      border-radius: 18px;
-      padding: 14px 16px;
-      font-size: 0.92rem;
-      font-weight: 900;
-      text-transform: uppercase;
+      gap: 14px;
+      padding: 15px 18px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      font-weight: 700;
+      animation: riseIn 0.4s ease both;
     }
 
     .leaderboard-item.winner {
-      border-color: rgba(255,221,102,0.8);
-      background: #fff3a6;
+      background: linear-gradient(135deg, rgba(251, 191, 36, 0.18), rgba(236, 72, 153, 0.12));
+      border-color: rgba(251, 191, 36, 0.45);
     }
 
     .leaderboard-rank {
-      width: 34px;
-      height: 34px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: #b7f7ff;
-      border: 3px solid var(--ink);
-      border-radius: 14px;
-      font-size: 0.88rem;
+      display: grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      flex: none;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--muted);
+    }
+
+    .leaderboard-item.winner .leaderboard-rank {
+      background: var(--gold);
+      color: #3b2400;
     }
 
     .leaderboard-name { flex: 1; }
-    .leaderboard-score { color: var(--gold); font-weight: 800; }
+
+    .leaderboard-score {
+      color: var(--gold);
+      font-size: 0.95rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    /* ---------- Responsive ---------- */
 
     @media (max-width: 640px) {
-      body { padding: 14px; }
+      body { padding: 14px 12px 28px; }
+
       .screen {
-        padding: 18px 14px 20px;
-        border-radius: 18px;
+        padding: 20px 16px 24px;
+        border-radius: 20px;
       }
+
       .topbar {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .nav-cluster { order: 3; width: 100%; }
+      .nav-tab { flex: 1; min-width: 0; }
+
+      .split-panel { grid-template-columns: 1fr; }
+      .friend-form { grid-template-columns: 1fr; }
+      button.small-button { width: 100%; }
+
+      .friend-list li, .party-list li, .invite-box {
         flex-direction: column;
-        padding: 10px;
-      }
-      .nav-cluster { width: 100%; }
-      .nav-tab { flex: 1 1 120px; }
-      .split-panel,
-      .friend-form {
-        grid-template-columns: 1fr;
-      }
-      button.small-button {
-        width: 100%;
-      }
-      .friend-list li,
-      .party-list li,
-      .invite-box {
         align-items: stretch;
-        flex-direction: column;
       }
-      .friend-actions {
-        width: 100%;
+
+      .friend-actions { width: 100%; }
+      .friend-actions button { flex: 1; }
+
+      .card { padding: 20px 16px; }
+      .room-code { letter-spacing: 0.18em; text-indent: 0.18em; padding: 14px 18px; }
+
+      .result-item { flex-direction: column; align-items: flex-start; gap: 8px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
       }
-      .result-item { align-items: flex-start; flex-direction: column; }
-      .room-code { letter-spacing: 0.1em; }
     }
   </style>
 </head>
 <body>
+  <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+  <div id="toastHost" aria-live="polite"></div>
+
+  <!-- ============ HOME ============ -->
   <div id="homeScreen" class="screen">
     <div class="topbar">
       <div class="mini-brand"><span class="brand-dot"></span> Real Ones</div>
@@ -763,25 +956,26 @@
         <button id="playTab" class="nav-tab active" type="button" onclick="showHomePanel('play')">Play</button>
         <button id="friendsTab" class="nav-tab" type="button" onclick="showHomePanel('friends')">Friends</button>
       </div>
-      <div class="coin-badge">150</div>
+      <div class="round-chip">2-8 players</div>
     </div>
+
     <h1>How well do your friends really know you?</h1>
-    <p class="subtitle">Private answers. Public guesses. Pure chaos.</p>
+    <p class="subtitle">Answer three questions in private. Then everyone guesses what you said.</p>
 
     <div id="playPanel" class="home-panel">
       <div class="stack">
-        <input id="nameInput" type="text" maxlength="24" placeholder="Enter your name" />
-        <button onclick="createGame()">Create Party Room</button>
-        <div class="divider">Or</div>
-        <input id="roomInput" type="text" maxlength="6" placeholder="Enter room code" />
-        <button onclick="joinGame()">Join Party</button>
+        <input id="nameInput" type="text" maxlength="24" placeholder="Your name" autocomplete="nickname" />
+        <button onclick="createGame()">Create room</button>
+        <div class="divider">or</div>
+        <input id="roomInput" type="text" maxlength="6" placeholder="Room code" autocapitalize="characters" autocomplete="off" spellcheck="false" />
+        <button class="secondary" onclick="joinGame()">Join room</button>
       </div>
 
       <div class="party-card">
-        <h3>Your Party</h3>
-        <p class="subtitle">Add friends from your list, then share the room code when you create a lobby.</p>
+        <h3>Your party</h3>
+        <p class="subtitle">Line up who is playing tonight, then share the room code once you create a lobby.</p>
         <ul id="partyList" class="party-list"></ul>
-        <button class="secondary small-button" type="button" onclick="clearParty()" style="margin-top: 12px;">Clear Party</button>
+        <button class="secondary small-button" type="button" onclick="clearParty()" style="margin-top: 14px;">Clear party</button>
       </div>
     </div>
 
@@ -796,44 +990,51 @@
           <ul id="friendsList" class="friend-list"></ul>
         </div>
         <div class="party-card">
-          <h3>Party Queue</h3>
+          <h3>Party queue</h3>
           <p class="subtitle">Pick up to 8 names for tonight's game.</p>
           <ul id="friendsPartyList" class="party-list"></ul>
-          <button class="secondary small-button" type="button" onclick="showHomePanel('play')" style="margin-top: 12px;">Back To Play</button>
+          <button class="secondary small-button" type="button" onclick="showHomePanel('play')" style="margin-top: 14px;">Back to play</button>
         </div>
       </div>
       <div id="partyStatus" class="party-status" aria-live="polite"></div>
     </div>
-
-    <div id="status" class="status" aria-live="polite"></div>
   </div>
 
+  <!-- ============ LOBBY ============ -->
   <div id="lobbyScreen" class="screen hidden">
     <div class="topbar">
       <div class="mini-brand"><span class="brand-dot"></span> Lobby</div>
+      <div id="playerCount" class="round-chip">1 / 8 players</div>
     </div>
-    <h2>Room code</h2>
+
+    <h3>Room code</h3>
     <div id="roomCodeDisplay" class="room-code">------</div>
-    <div class="party-card" style="margin-bottom: 18px;">
-      <h3>Party Invite</h3>
+
+    <div class="party-card" style="margin-bottom: 20px;">
+      <h3>Invite</h3>
       <div class="invite-box">
         <span id="inviteText">Create a room to invite friends</span>
-        <button class="small-button" type="button" onclick="copyInvite()">Copy</button>
+        <button class="small-button secondary" type="button" onclick="copyInvite()">Copy</button>
       </div>
     </div>
+
     <h3>Players</h3>
     <ul id="playersList" class="player-list"></ul>
 
     <div class="stack">
-      <button id="startButton" onclick="startGame()">Start Game</button>
-      <button class="secondary" onclick="leaveGame()">Leave Room</button>
+      <button id="startButton" onclick="startGame()">Start game</button>
+      <p id="lobbyHint" class="hint">Waiting for the host to start the game...</p>
+      <button class="secondary" onclick="leaveGame()">Leave room</button>
     </div>
   </div>
 
+  <!-- ============ PRIVATE QUESTIONS ============ -->
   <div id="privateQuestionScreen" class="screen hidden">
     <div class="topbar">
-      <div class="mini-brand"><span class="brand-dot"></span> Your turn</div>
+      <div class="mini-brand"><span class="brand-dot"></span> Private</div>
+      <div class="round-chip">Only you can see this</div>
     </div>
+
     <div class="card">
       <div class="segment-timer hidden" aria-live="polite">
         <div class="timer-row">
@@ -842,18 +1043,22 @@
         </div>
         <div class="timer-track"><div class="timer-fill"></div></div>
       </div>
+
       <span id="personalQuestionCounter" class="question-counter">Question 1 of 3</span>
       <div id="privateQuestionText" class="question-text">What is your favourite fruit?</div>
-      <input id="privateAnswerInput" class="answer-input" type="text" maxlength="120" placeholder="Type your answer" />
-      <button id="privateSubmitButton" onclick="submitPrivateAnswer()" style="margin-top: 16px;">Submit Answer</button>
+      <input id="privateAnswerInput" type="text" maxlength="120" placeholder="Type your real answer" autocomplete="off" />
+      <button id="privateSubmitButton" onclick="submitPrivateAnswer()" style="margin-top: 14px;">Submit answer</button>
+      <div class="private-note">🔒 Nobody else sees this until they have to guess it.</div>
     </div>
   </div>
 
+  <!-- ============ WAITING ============ -->
   <div id="waitingScreen" class="screen hidden">
     <div class="waiting-box">
       <div class="loading-orbit" aria-hidden="true"></div>
       <h2 id="waitingTitle">Waiting...</h2>
       <p id="waitingText" class="subtitle">Hold tight while everyone finishes up.</p>
+
       <div class="segment-timer hidden" aria-live="polite">
         <div class="timer-row">
           <span>Time left</span>
@@ -861,18 +1066,18 @@
         </div>
         <div class="timer-track"><div class="timer-fill"></div></div>
       </div>
-      <div class="loading-dots" aria-hidden="true">
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
+
+      <div class="loading-dots" aria-hidden="true"><span></span><span></span><span></span></div>
     </div>
   </div>
 
+  <!-- ============ GUESSING ============ -->
   <div id="guessScreen" class="screen hidden">
     <div class="topbar">
       <div class="mini-brand"><span class="brand-dot"></span> Guess</div>
+      <div id="guessRoundChip" class="round-chip">Question 1 of 8</div>
     </div>
+
     <div class="card">
       <div class="segment-timer hidden" aria-live="polite">
         <div class="timer-row">
@@ -881,18 +1086,22 @@
         </div>
         <div class="timer-track"><div class="timer-fill"></div></div>
       </div>
-      <span class="guess-label">Question for</span>
+
+      <span class="guess-label">This one is about</span>
       <h2 id="guessOwner">Friend</h2>
       <div id="guessQuestion" class="question-text">Who knows this?</div>
-      <input id="guessInput" type="text" maxlength="120" placeholder="What do you think they answered?" />
-      <button onclick="submitGuess()" style="margin-top: 16px;">Submit Guess</button>
+      <input id="guessInput" type="text" maxlength="120" placeholder="What do you think they answered?" autocomplete="off" />
+      <button onclick="submitGuess()" style="margin-top: 14px;">Submit guess</button>
     </div>
   </div>
 
+  <!-- ============ RESULTS ============ -->
   <div id="resultsScreen" class="screen hidden">
     <div class="topbar">
       <div class="mini-brand"><span class="brand-dot"></span> Reveal</div>
+      <div id="resultsRoundChip" class="round-chip">Question 1 of 8</div>
     </div>
+
     <div class="card">
       <div class="segment-timer hidden" aria-live="polite">
         <div class="timer-row">
@@ -901,46 +1110,76 @@
         </div>
         <div class="timer-track"><div class="timer-fill"></div></div>
       </div>
-      <span class="guess-label">Answer</span>
-      <h2 id="correctAnswer">Pizza</h2>
-      <p id="questionResult" class="subtitle">Friend's answer</p>
+
+      <div id="revealedQuestion" class="revealed-question">The question</div>
+
+      <div class="answer-reveal">
+        <span class="guess-label" id="answerOwnerLabel">The real answer</span>
+        <div id="correctAnswer">Pizza</div>
+      </div>
+
       <div id="resultsList" class="results-list"></div>
-      <button id="nextQuestionButton" onclick="advanceRound()">Next Question</button>
+      <button id="nextQuestionButton" onclick="advanceRound()">Next question</button>
     </div>
   </div>
 
+  <!-- ============ FINAL ============ -->
   <div id="finalScreen" class="screen hidden">
-    <div class="winner-banner">Final Scores</div>
+    <div class="trophy" aria-hidden="true">🏆</div>
+    <div class="winner-banner">Final scores</div>
     <h1>Game over!</h1>
     <p id="winnerText" class="subtitle">And the winner is...</p>
     <div id="leaderboard" class="leaderboard"></div>
-    <button onclick="leaveGame()">Play Again</button>
+    <div class="stack">
+      <button onclick="leaveGame()">Play again</button>
+    </div>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
     const socket = io();
+
     let currentRoom = null;
+    let hostId = null;
     let isHost = false;
+    let latestPlayers = [];
     let timerInterval = null;
     let activeTimerDeadline = 0;
     let activeTimerDuration = 60;
     let friends = [];
     let party = [];
+
     const friendsStorageKey = 'realOnesFriends';
     const partyStorageKey = 'realOnesParty';
 
+    /* ---------- Feedback ---------- */
+
     function setStatus(message, isError = false) {
-      const status = document.getElementById('status');
-      status.textContent = message;
-      status.style.color = isError ? '#d7264f' : '#b85f00';
+      if (!message) return;
+      showToast(message, isError);
+    }
+
+    function showToast(message, isError = false) {
+      const host = document.getElementById('toastHost');
+      const toast = document.createElement('div');
+
+      toast.className = 'toast' + (isError ? ' error' : '');
+      toast.textContent = message;
+      host.appendChild(toast);
+
+      setTimeout(() => {
+        toast.classList.add('leaving');
+        setTimeout(() => toast.remove(), 250);
+      }, 3200);
     }
 
     function setPartyStatus(message, isError = false) {
       const status = document.getElementById('partyStatus');
       status.textContent = message;
-      status.style.color = isError ? '#d7264f' : '#b85f00';
+      status.style.color = isError ? 'var(--red)' : 'var(--gold)';
     }
+
+    /* ---------- Friends / party queue (local only) ---------- */
 
     function normalizeName(name) {
       return String(name || '').trim().replace(/\s+/g, ' ');
@@ -956,8 +1195,12 @@
     }
 
     function savePartyData() {
-      localStorage.setItem(friendsStorageKey, JSON.stringify(friends));
-      localStorage.setItem(partyStorageKey, JSON.stringify(party));
+      try {
+        localStorage.setItem(friendsStorageKey, JSON.stringify(friends));
+        localStorage.setItem(partyStorageKey, JSON.stringify(party));
+      } catch (_error) {
+        /* storage unavailable (private browsing) - the queue just won't persist */
+      }
     }
 
     function showHomePanel(panelName) {
@@ -966,7 +1209,6 @@
       document.getElementById('friendsPanel').classList.toggle('hidden', !isFriends);
       document.getElementById('playTab').classList.toggle('active', !isFriends);
       document.getElementById('friendsTab').classList.toggle('active', isFriends);
-      setStatus('');
       renderFriends();
       renderParty();
     }
@@ -1034,7 +1276,7 @@
 
         removeButton.className = 'small-button danger';
         removeButton.type = 'button';
-        removeButton.textContent = 'Kick';
+        removeButton.textContent = 'Remove';
         removeButton.addEventListener('click', () => removePartyMember(member));
 
         item.appendChild(name);
@@ -1085,7 +1327,7 @@
       if (party.includes(friend)) return;
 
       if (party.length >= 8) {
-        setPartyStatus('Party is full. Max 8 friends.', true);
+        setPartyStatus('Party is full. Max 8 players.', true);
         return;
       }
 
@@ -1123,8 +1365,7 @@
         return;
       }
 
-      const names = party.length ? ` for ${party.join(', ')}` : '';
-      inviteText.textContent = `Join my Real Ones party${names}: ${currentRoom}`;
+      inviteText.textContent = `Join my Real Ones party: ${currentRoom} - ${window.location.origin}`;
     }
 
     async function copyInvite() {
@@ -1133,7 +1374,7 @@
 
       try {
         await navigator.clipboard.writeText(message);
-        setStatus('Party invite copied.');
+        showToast('Invite copied to your clipboard.');
       } catch (_error) {
         const textarea = document.createElement('textarea');
         textarea.value = message;
@@ -1141,16 +1382,22 @@
         textarea.select();
         document.execCommand('copy');
         textarea.remove();
-        setStatus('Party invite copied.');
+        showToast('Invite copied to your clipboard.');
       }
     }
 
+    /* ---------- Screens & timer ---------- */
+
+    const screens = ['homeScreen', 'lobbyScreen', 'privateQuestionScreen', 'waitingScreen', 'guessScreen', 'resultsScreen', 'finalScreen'];
+
     function showScreen(id) {
-      const screens = ['homeScreen', 'lobbyScreen', 'privateQuestionScreen', 'waitingScreen', 'guessScreen', 'resultsScreen', 'finalScreen'];
       screens.forEach((screenId) => {
-        document.getElementById(screenId).classList.add('hidden');
+        document.getElementById(screenId).classList.toggle('hidden', screenId !== id);
       });
-      document.getElementById(id).classList.remove('hidden');
+    }
+
+    function isScreenVisible(id) {
+      return !document.getElementById(id).classList.contains('hidden');
     }
 
     function setTimerVisible(isVisible) {
@@ -1201,37 +1448,91 @@
       setTimerVisible(false);
     }
 
+    /* ---------- Lobby rendering ---------- */
+
+    function initials(name) {
+      return String(name || '?').trim().charAt(0).toUpperCase() || '?';
+    }
+
     function updatePlayers(players) {
+      latestPlayers = Array.isArray(players) ? players : [];
+      isHost = Boolean(hostId) && hostId === socket.id;
+
       const list = document.getElementById('playersList');
       list.innerHTML = '';
 
-      players.forEach((player, index) => {
-        const li = document.createElement('li');
-        const left = document.createElement('span');
-        const right = document.createElement('span');
+      latestPlayers.forEach((player) => {
+        const item = document.createElement('li');
+        const avatar = document.createElement('span');
+        const name = document.createElement('span');
 
-        left.textContent = player.name;
-        right.className = 'badge';
-        right.textContent = index === 0 ? 'Host' : 'Player';
+        avatar.className = 'avatar';
+        avatar.textContent = initials(player.name);
 
-        li.appendChild(left);
-        li.appendChild(right);
-        list.appendChild(li);
+        name.className = 'player-name';
+        name.textContent = player.name;
+
+        item.appendChild(avatar);
+        item.appendChild(name);
+
+        if (player.id === socket.id) {
+          const you = document.createElement('span');
+          you.className = 'badge you';
+          you.textContent = 'You';
+          item.appendChild(you);
+        }
+
+        if (player.id === hostId) {
+          const badge = document.createElement('span');
+          badge.className = 'badge';
+          badge.textContent = 'Host';
+          item.appendChild(badge);
+        }
+
+        list.appendChild(item);
       });
 
+      document.getElementById('playerCount').textContent = `${latestPlayers.length} / 8 players`;
+
       const startButton = document.getElementById('startButton');
-      startButton.hidden = !isHost;
-      if (!isHost) {
-        startButton.textContent = 'Waiting for host';
+      const hint = document.getElementById('lobbyHint');
+      const enoughPlayers = latestPlayers.length >= 2;
+
+      startButton.classList.toggle('hidden', !isHost);
+      startButton.disabled = isHost && !enoughPlayers;
+      hint.classList.remove('error');
+
+      if (isHost) {
+        hint.textContent = enoughPlayers
+          ? 'Everyone in? Kick it off whenever you are ready.'
+          : 'You need at least 2 players to start.';
       } else {
-        startButton.textContent = 'Start Game';
+        hint.textContent = 'Waiting for the host to start the game...';
+      }
+
+      refreshNextQuestionButton();
+    }
+
+    function refreshNextQuestionButton() {
+      const nextButton = document.getElementById('nextQuestionButton');
+      if (!nextButton) return;
+
+      nextButton.disabled = !isHost;
+      if (!isHost) {
+        nextButton.textContent = 'Waiting for the host...';
+      } else if (!nextButton.dataset.hostLabel) {
+        nextButton.textContent = 'Next question';
+      } else {
+        nextButton.textContent = nextButton.dataset.hostLabel;
       }
     }
+
+    /* ---------- Actions ---------- */
 
     function createGame() {
       const name = document.getElementById('nameInput').value.trim();
       if (!name) {
-        setStatus('Please enter your name.', true);
+        setStatus('Enter your name first.', true);
         return;
       }
       socket.emit('createGame', name);
@@ -1240,14 +1541,17 @@
     function joinGame() {
       const name = document.getElementById('nameInput').value.trim();
       const room = document.getElementById('roomInput').value.trim().toUpperCase();
+
       if (!name) {
-        setStatus('Please enter your name.', true);
+        setStatus('Enter your name first.', true);
         return;
       }
-      if (!room) {
-        setStatus('Please enter a room code.', true);
+
+      if (room.length !== 6) {
+        setStatus('Room codes are 6 characters.', true);
         return;
       }
+
       document.getElementById('roomInput').value = room;
       socket.emit('joinGame', { playerName: name, roomCode: room });
     }
@@ -1257,28 +1561,33 @@
     }
 
     function submitPrivateAnswer() {
-      const answer = document.getElementById('privateAnswerInput').value.trim();
+      const input = document.getElementById('privateAnswerInput');
+      const answer = input.value.trim();
+
       if (!answer) {
-        setStatus('Please enter an answer before continuing.', true);
+        setStatus('Type an answer before continuing.', true);
         return;
       }
 
       socket.emit('submitPersonalAnswer', { roomCode: currentRoom, answer });
-      document.getElementById('privateAnswerInput').value = '';
+      input.value = '';
     }
 
     function submitGuess() {
-      const guess = document.getElementById('guessInput').value.trim();
+      const input = document.getElementById('guessInput');
+      const guess = input.value.trim();
+
       if (!guess) {
-        setStatus('Please enter your guess.', true);
+        setStatus('Type a guess before submitting.', true);
         return;
       }
 
       socket.emit('submitGuess', { roomCode: currentRoom, guess });
-      document.getElementById('guessInput').value = '';
-      showScreen('waitingScreen');
-      document.getElementById('waitingTitle').textContent = 'Guess submitted';
+      input.value = '';
+
+      document.getElementById('waitingTitle').textContent = 'Guess locked in';
       document.getElementById('waitingText').textContent = 'Waiting for the rest of the group...';
+      showScreen('waitingScreen');
     }
 
     function advanceRound() {
@@ -1287,133 +1596,110 @@
     }
 
     function leaveGame() {
-      if (socket) {
-        socket.disconnect();
-      }
+      socket.disconnect();
       window.location.reload();
     }
 
-    socket.on('gameCreated', (data) => {
+    /* ---------- Socket events ---------- */
+
+    function enterLobby(data) {
       currentRoom = data.roomCode;
-      isHost = true;
+      hostId = data.hostId;
       document.getElementById('roomCodeDisplay').textContent = data.roomCode;
       updatePlayers(data.players);
       updateInviteText();
-      setStatus('');
       stopTimer();
       showScreen('lobbyScreen');
+    }
+
+    socket.on('gameCreated', (data) => {
+      enterLobby(data);
+      showToast(`Room ${data.roomCode} is open. Share the code!`);
     });
 
     socket.on('gameJoined', (data) => {
-      currentRoom = data.roomCode;
-      isHost = false;
-      document.getElementById('roomCodeDisplay').textContent = data.roomCode;
-      updatePlayers(data.players);
-      updateInviteText();
-      setStatus('');
-      stopTimer();
-      showScreen('lobbyScreen');
-    });
-
-    document.getElementById('nameInput').addEventListener('keydown', (event) => {
-      if (event.key === 'Enter') {
-        if (document.getElementById('roomInput').value.trim()) {
-          joinGame();
-        } else {
-          createGame();
-        }
-      }
-    });
-
-    document.getElementById('roomInput').addEventListener('input', (event) => {
-      event.target.value = event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
-    });
-
-    document.getElementById('roomInput').addEventListener('keydown', (event) => {
-      if (event.key === 'Enter') {
-        joinGame();
-      }
-    });
-
-    document.getElementById('friendInput').addEventListener('keydown', (event) => {
-      if (event.key === 'Enter') {
-        addFriend();
-      }
-    });
-
-    document.getElementById('privateAnswerInput').addEventListener('keydown', (event) => {
-      if (event.key === 'Enter') {
-        submitPrivateAnswer();
-      }
-    });
-
-    document.getElementById('guessInput').addEventListener('keydown', (event) => {
-      if (event.key === 'Enter') {
-        submitGuess();
-      }
+      enterLobby(data);
     });
 
     socket.on('playersUpdated', (data) => {
+      hostId = data.hostId;
       updatePlayers(data.players);
     });
 
-    socket.on('joinError', (message) => {
-      setStatus(message, true);
+    socket.on('playerLeft', (data) => {
+      const wasHost = isHost;
+      isHost = Boolean(data.hostId) && data.hostId === socket.id;
+      showToast(`${data.name} left the room.`);
+
+      if (!wasHost && isHost) {
+        showToast('You are the host now.');
+      }
     });
 
-    socket.on('startError', (message) => {
-      setStatus(message, true);
+    socket.on('returnedToLobby', (data) => {
+      hostId = data.hostId;
+      updatePlayers(data.players);
+      stopTimer();
+      showScreen('lobbyScreen');
+      showToast(data.message || 'Back to the lobby.', true);
     });
+
+    socket.on('joinError', (message) => setStatus(message, true));
+    socket.on('startError', (message) => setStatus(message, true));
 
     socket.on('yourNextQuestion', ({ question, questionNumber, totalQuestions, deadline, durationSeconds }) => {
       document.getElementById('personalQuestionCounter').textContent = `Question ${questionNumber} of ${totalQuestions}`;
       document.getElementById('privateQuestionText').textContent = question;
       document.getElementById('privateAnswerInput').value = '';
-      setStatus('');
       showScreen('privateQuestionScreen');
+      document.getElementById('privateAnswerInput').focus();
       startTimer({ deadline, durationSeconds });
     });
 
     socket.on('personalQuestionsComplete', () => {
       stopTimer();
-      showScreen('waitingScreen');
-      document.getElementById('waitingTitle').textContent = 'All set';
+      document.getElementById('waitingTitle').textContent = 'All locked in';
       document.getElementById('waitingText').textContent = 'Waiting for everyone else to finish their answers...';
-    });
-
-    socket.on('guessQuestion', ({ question, ownerName, deadline, durationSeconds }) => {
-      document.getElementById('guessOwner').textContent = `${ownerName}'s question`;
-      document.getElementById('guessQuestion').textContent = question;
-      document.getElementById('guessInput').value = '';
-      setStatus('');
-      showScreen('guessScreen');
-      startTimer({ deadline, durationSeconds });
-    });
-
-    socket.on('questionOwnerWaiting', ({ question, ownerName, deadline, durationSeconds }) => {
       showScreen('waitingScreen');
-      document.getElementById('waitingTitle').textContent = 'Everyone is guessing';
-      document.getElementById('waitingText').textContent = `Your friends are trying to guess your answer to: ${question}`;
+    });
+
+    socket.on('guessQuestion', ({ question, ownerName, questionNumber, totalQuestions, deadline, durationSeconds }) => {
+      document.getElementById('guessOwner').textContent = ownerName;
+      document.getElementById('guessQuestion').textContent = question;
+      document.getElementById('guessRoundChip').textContent = `Question ${questionNumber} of ${totalQuestions}`;
+      document.getElementById('guessInput').value = '';
+      showScreen('guessScreen');
+      document.getElementById('guessInput').focus();
       startTimer({ deadline, durationSeconds });
     });
 
-    socket.on('questionRevealed', ({ ownerName, correctAnswer, questionNumber, totalQuestions, results, deadline, durationSeconds }) => {
+    socket.on('questionOwnerWaiting', ({ question, deadline, durationSeconds }) => {
+      document.getElementById('waitingTitle').textContent = 'This one is about you';
+      document.getElementById('waitingText').textContent = `Everyone is guessing what you answered for: ${question}`;
+      showScreen('waitingScreen');
+      startTimer({ deadline, durationSeconds });
+    });
+
+    socket.on('questionRevealed', ({ question, ownerName, correctAnswer, questionNumber, totalQuestions, results, deadline, durationSeconds }) => {
+      document.getElementById('revealedQuestion').textContent = question;
+      document.getElementById('answerOwnerLabel').textContent = `${ownerName} actually said`;
       document.getElementById('correctAnswer').textContent = correctAnswer;
-      document.getElementById('questionResult').textContent = `${ownerName}'s answer`;
+      document.getElementById('resultsRoundChip').textContent = `Question ${questionNumber} of ${totalQuestions}`;
 
       const list = document.getElementById('resultsList');
       list.innerHTML = '';
 
-      results.forEach((result) => {
+      results.forEach((result, index) => {
         const item = document.createElement('div');
-        item.className = 'result-item' + (result.matched ? ' matched' : '');
+        item.className = 'result-item' + (result.matched ? ' matched' : result.owner ? ' owner-row' : '');
+        item.style.animationDelay = `${index * 0.05}s`;
 
         const meta = document.createElement('div');
         meta.className = 'result-meta';
 
         const name = document.createElement('div');
         name.className = 'result-name';
-        name.textContent = result.name;
+        name.textContent = result.owner ? `${result.name} (their answer)` : result.name;
 
         const answer = document.createElement('div');
         answer.className = 'result-answer';
@@ -1421,7 +1707,7 @@
 
         const tag = document.createElement('div');
         tag.className = 'result-tag';
-        tag.textContent = result.matched ? '✅ +1' : result.owner ? 'Owner' : 'No point';
+        tag.textContent = result.matched ? '+1 point' : result.owner ? 'Owner' : 'No point';
 
         meta.appendChild(name);
         meta.appendChild(answer);
@@ -1431,20 +1717,25 @@
       });
 
       const nextButton = document.getElementById('nextQuestionButton');
-      nextButton.disabled = !isHost;
-      nextButton.textContent = questionNumber >= totalQuestions ? 'See Final Scores' : 'Next Question';
+      nextButton.dataset.hostLabel = questionNumber >= totalQuestions ? 'See final scores' : 'Next question';
+      refreshNextQuestionButton();
+
       showScreen('resultsScreen');
       startTimer({ deadline, durationSeconds });
     });
 
-    socket.on('gameFinished', ({ leaderboard, winnerName }) => {
+    socket.on('gameFinished', ({ leaderboard, winnerName, message }) => {
       stopTimer();
+
       const board = document.getElementById('leaderboard');
       board.innerHTML = '';
 
+      const topScore = leaderboard.length ? leaderboard[0].score : 0;
+
       leaderboard.forEach((player, index) => {
         const item = document.createElement('div');
-        item.className = 'leaderboard-item' + (index === 0 ? ' winner' : '');
+        item.className = 'leaderboard-item' + (topScore > 0 && player.score === topScore ? ' winner' : '');
+        item.style.animationDelay = `${index * 0.07}s`;
 
         const rank = document.createElement('div');
         rank.className = 'leaderboard-rank';
@@ -1456,7 +1747,7 @@
 
         const score = document.createElement('div');
         score.className = 'leaderboard-score';
-        score.textContent = `${player.score} pts`;
+        score.textContent = `${player.score} ${player.score === 1 ? 'pt' : 'pts'}`;
 
         item.appendChild(rank);
         item.appendChild(name);
@@ -1464,9 +1755,59 @@
         board.appendChild(item);
       });
 
-      document.getElementById('winnerText').textContent = winnerName ? `${winnerName} wins the crown!` : 'Nobody scored any points this round.';
+      const winners = leaderboard.filter((player) => player.score === topScore && topScore > 0);
+      let text = 'Nobody scored a point. Brutal.';
+
+      if (winners.length > 1) {
+        text = `It's a tie! ${winners.map((player) => player.name).join(' & ')} share the crown.`;
+      } else if (winnerName && topScore > 0) {
+        text = `${winnerName} knows everyone best!`;
+      }
+
+      document.getElementById('winnerText').textContent = text;
       showScreen('finalScreen');
+
+      if (message) showToast(message, true);
     });
+
+    socket.on('disconnect', () => {
+      if (!isScreenVisible('homeScreen')) {
+        showToast('Lost connection to the server.', true);
+      }
+    });
+
+    /* ---------- Input wiring ---------- */
+
+    document.getElementById('nameInput').addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter') return;
+      if (document.getElementById('roomInput').value.trim()) {
+        joinGame();
+      } else {
+        createGame();
+      }
+    });
+
+    document.getElementById('roomInput').addEventListener('input', (event) => {
+      event.target.value = event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
+    });
+
+    document.getElementById('roomInput').addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') joinGame();
+    });
+
+    document.getElementById('friendInput').addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') addFriend();
+    });
+
+    document.getElementById('privateAnswerInput').addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') submitPrivateAnswer();
+    });
+
+    document.getElementById('guessInput').addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') submitGuess();
+    });
+
+    /* ---------- Boot ---------- */
 
     friends = loadStoredList(friendsStorageKey);
     party = loadStoredList(partyStorageKey).filter((member) => friends.includes(member)).slice(0, 8);
